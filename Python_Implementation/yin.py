@@ -31,6 +31,10 @@ def yin(y: np.ndarray) -> np.ndarray:
         acf = irfft(a * b, frame_length)[win_length:]
         acf[np.abs(acf) < 1e-6] = 0
 
+        # LOOK TO SEE IF CAN CUT
+        # a = rfft(frame, frame_length)
+        # acf = irfft(a * np.conj(a), frame_length)[win_length:]
+
         # === 2. Energy terms ===
         energy = np.cumsum(frame**2)
         energy = energy[win_length:] - energy[:-win_length]
@@ -39,7 +43,7 @@ def yin(y: np.ndarray) -> np.ndarray:
         # === 2.5 Velocity terms ===
         amplitude = np.sqrt(np.mean(frame**2)) # take RMS of frame
         maximum = np.max(np.abs(frame))
-        vel = (amplitude / maximum * 127).astype(int)
+        vel = 0 if maximum == 0 else np.clip((amplitude / maximum * 127), 0, 127).astype(int) # scale to be between 0-127
 
         # === 3. Difference function ===
         diff = energy[0] + energy - 2 * acf
