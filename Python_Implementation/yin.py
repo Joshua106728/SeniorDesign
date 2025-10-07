@@ -31,10 +31,6 @@ def yin(y: np.ndarray) -> np.ndarray:
         acf = irfft(a * b, frame_length)[win_length:]
         acf[np.abs(acf) < 1e-6] = 0
 
-        # LOOK TO SEE IF CAN CUT
-        # a = rfft(frame, frame_length)
-        # acf = irfft(a * np.conj(a), frame_length)[win_length:]
-
         # === 2. Energy terms ===
         energy = np.cumsum(frame**2)
         energy = energy[win_length:] - energy[:-win_length]
