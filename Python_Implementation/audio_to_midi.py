@@ -39,7 +39,7 @@ def seconds_to_ticks(seconds, ticks_per_beat=96, bpm=120):
     sec_per_beat = 60.0 / bpm
     return int(round(seconds / sec_per_beat * ticks_per_beat))
 
-def write_midi_file(write_midi, filename="output.mid"):
+def write_midi_file(write_midi, filename, time_length):
     ticks_per_beat = 96
     bpm = 120
     track_data = []
@@ -48,25 +48,21 @@ def write_midi_file(write_midi, filename="output.mid"):
     microsec_per_beat = int(60_000_000 / bpm)
     tempo_bytes = list(microsec_per_beat.to_bytes(3, byteorder='big'))
     track_data += [0x00, 0xFF, 0x51, 0x03] + tempo_bytes
+    new_event = seconds_to_ticks(time_length, ticks_per_beat, bpm)
 
     for _, event in write_midi.items():
         note = int(event["note"])
         velocity = int(event["velocity"])
-        start_time = event["start"]
         duration = event["time"]
 
         # Convert seconds → ticks
-        delta_ticks = seconds_to_ticks(start_time, ticks_per_beat, bpm)
         duration_ticks = seconds_to_ticks(duration, ticks_per_beat, bpm)
 
         if event["on_off"] == 1 and velocity > 0:
             # note_on after delta_ticks (gap since last note)
-            track_data += note_on(delta_ticks, note, velocity)
+            track_data += note_on(new_event, note, velocity)
             # note_off after duration
             track_data += note_off(duration_ticks, note, 64)
-
-        # update the end time for the next note’s delta
-        prev_end_time = start_time + duration
 
     # end of track
     track_data += [0x00, 0xFF, 0x2F, 0x00]
@@ -86,7 +82,7 @@ def write_midi_file(write_midi, filename="output.mid"):
     print(f"MIDI file written to {filename}")
 
 def main():
-    filepath = Path("Python_Implementation\single\jingle_bells.mp3")
+    filepath = Path("Python_Implementation\single\clouds_for_today.mp3")
     y, sr = librosa.load(str(filepath), sr=None, mono=True)
 
     # YIN Algorithm
@@ -108,12 +104,11 @@ def main():
         "on_off": 1 if velocity[0] > 0 else 0,
         "velocity": velocity[0],
         "time": time_length,
-        "start": 0
     }
 
     for x in range(1, len(notes)):
         # print(f"Index {x}: note: {notes[x]} | velocity: {velocity[x]}")
-        if notes[x] == write_midi[counter]['note'] and abs(velocity[x] - write_midi[counter]["velocity"] < 5):
+        if notes[x] == write_midi[counter]['note']: # and abs(velocity[x] - write_midi[counter]["velocity"] < 5):
             # same note -> extend time duration
             write_midi[counter]["time"] += time_length
         else:
@@ -124,14 +119,13 @@ def main():
                 "on_off": 1 if velocity[x] > 0 else 0,
                 "velocity": velocity[x],
                 "time": time_length,
-                "start": x * time_length
             }
 
     for k, v in write_midi.items():
         print(f"{k}: {v}")
 
     # Write to MIDI file
-    write_midi_file(write_midi, "jingle_bells.mid")
+    write_midi_file(write_midi, "clouds.mid", time_length)
 
 if __name__=='__main__':
     main()
