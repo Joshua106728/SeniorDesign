@@ -3,10 +3,11 @@ from pathlib import Path
 import librosa
 import numpy as np
 from yin import yin
+from scipy.ndimage import median_filter
 
 frame_length = 1024
 hop_length = 512
-sr = 44100
+sample_rate = 44100
 
 def freq_to_midi(f0):
     # MIDI note formula = 69 + 12log_2(f/440)
@@ -55,6 +56,9 @@ def write_midi_file(write_midi, filename, time_length):
         velocity = int(event["velocity"])
         duration = event["time"]
 
+        if duration < 0.1:
+            continue
+
         # Convert seconds → ticks
         duration_ticks = seconds_to_ticks(duration, ticks_per_beat, bpm)
 
@@ -82,17 +86,18 @@ def write_midi_file(write_midi, filename, time_length):
     print(f"MIDI file written to {filename}")
 
 def main():
-    filepath = Path("Python_Implementation\single\clouds_for_today.mp3")
-    y, sr = librosa.load(str(filepath), sr=None, mono=True)
+    filepath = Path("twinkle.wav")
+    y, sr = librosa.load(str(filepath), sr=sample_rate, mono=True)
 
     # YIN Algorithm
     y = np.concatenate((np.zeros(frame_length - hop_length), y)) # pads so first point starts in the center
     f0, velocity = yin(y) # fundamental frequency of each frame
+    f0_smooth = median_filter(f0, size=9)  # adjust window (in frames)
 
-    # Convert to MIDI
-    time_length = hop_length / sr # we are 'hopping' from note to note
-    notes = freq_to_midi(f0)
+    # to MIDI
+    notes = freq_to_midi(f0_smooth).astype(int)
     velocity = velocity.astype(int)
+    time_length = hop_length / sr
 
     # declare MIDI dictionary
     write_midi = {}
@@ -125,7 +130,7 @@ def main():
         print(f"{k}: {v}")
 
     # Write to MIDI file
-    write_midi_file(write_midi, "clouds.mid", time_length)
+    write_midi_file(write_midi, "twinkle.mid", time_length)
 
 if __name__=='__main__':
     main()
