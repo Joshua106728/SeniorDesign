@@ -13,8 +13,10 @@
 * Use an external source to extract MIDI file from SD card and convert it into sheet music (can be saved, downloaded, printed, etc. by user)
   
 **Installation**
-1. Clone this repository: 
-  * git clone https://github.com/Joshua106728/SeniorDesign.git
+1. Clone this repository:
+```bash
+git clone https://github.com/Joshua106728/SeniorDesign.git
+```
 
 2. Create and activate a virtual environment
 ```bash
