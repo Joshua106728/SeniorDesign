@@ -1,0 +1,5 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "STM32F411RET7")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/STM32F411RET7/KiCADv6/2026-01-14_22-01-32.kicad_sym")(options "")(descr ""))
+  (lib (name "TPS562208DDCR")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/TPS562208DDCR/KiCADv6/2026-01-21_22-15-16.kicad_sym")(options "")(descr ""))
+)
