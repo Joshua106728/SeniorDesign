@@ -415,11 +415,11 @@
     ],
     [
       "2ddad00a-af62-4659-9017-a3cd158a818d",
-      "MCU"
+      "MCU+Mic+UI"
     ],
     [
       "f1b1c289-1e04-4344-a520-d726c8046e56",
-      "Power Conversions"
+      "Power Conversions + Battery Monitor"
     ]
   ],
   "text_variables": {}

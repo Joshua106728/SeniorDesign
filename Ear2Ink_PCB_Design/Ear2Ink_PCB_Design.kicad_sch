@@ -21,7 +21,7 @@
 			(color 0 0 0 0.0000)
 		)
 		(uuid "2ddad00a-af62-4659-9017-a3cd158a818d")
-		(property "Sheetname" "MCU"
+		(property "Sheetname" "MCU+Mic+UI"
 			(at 114.3 36.1184 0)
 			(effects
 				(font
@@ -63,7 +63,7 @@
 			(color 0 0 0 0.0000)
 		)
 		(uuid "f1b1c289-1e04-4344-a520-d726c8046e56")
-		(property "Sheetname" "Power Conversions"
+		(property "Sheetname" "Power Conversions + Battery Monitor"
 			(at 31.75 36.1184 0)
 			(effects
 				(font
