@@ -7,4 +7,5 @@
   (lib (name "mic")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/SPH0645LM4H_B/KiCADv6/footprints.pretty")(options "")(descr ""))
   (lib (name "OSTTE020104")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/OSTTE020104")(options "")(descr ""))
   (lib (name "Inductor")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/IFSC1515AHER4R7M01")(options "")(descr ""))
+  (lib (name "Current_Monitor")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/ul_INA213AIDCKR/KiCADv6/footprints.pretty")(options "")(descr ""))
 )
