@@ -5313,7 +5313,7 @@
 				)
 			)
 		)
-		(property "Value" "IFSC1515AHER4R7M01"
+		(property "Value" "47uH"
 			(at 175.26 105.41 0)
 			(effects
 				(font
