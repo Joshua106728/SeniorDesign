@@ -24,11 +24,11 @@ def spectral_whiten(frame):
     for i in range(HOP_LENGTH+1):
         lo = max(0, i - SMOOTHING_WINDOW)
         hi = min(HOP_LENGTH+1, i + SMOOTHING_WINDOW + 1)
-        avg = (sum(magnitude[lo:hi]) / (hi - lo) ) + eps
+        avg = (sum(magnitude[lo:hi]) / 31 ) + eps # 31 = SMOOTHING_WINDOW * 2 + 1
         whitened[i] /= avg
-        
+    
     return whitened
-
+    
 def yin(frame, energy):
     # STEP 1: Autocorrelation
     # find power spectrum
