@@ -71,9 +71,10 @@ volatile bool half_ready = 0;
 volatile bool full_ready = 0;
 volatile int mic_overrun = 0;
 
+float32_t f0;
 uint8_t   midi_buffer[8192];
-float32_t f0_estimates[1024];
-float32_t f0_times[1024];
+float32_t f0_estimates[MAX_FRAMES];
+float32_t f0_times[MAX_FRAMES];
 int       total_frames = 0;
 int       midi_size = 0;
 int       note_event_count = 0;
@@ -214,18 +215,38 @@ int main(void)
 	  // Edge-triggered: just toggle state
 	  if (start_flag) {
 		  start_flag = 0;
-		  start_stop_recording = 1; /* lcd stuff */
+		  start_stop_recording = 1;
+		  total_frames = 0;
+		  note_event_count = 0;
+		  midi_size = 0;
 		  lcd_clear();
 		  lcd_put_cur(0, 0);
 		  lcd_send_string("REC AT 80 BPM");
 	  }
 	  if (stop_flag)  {
 		  stop_flag  = 0;
-		  start_stop_recording = 0; /* lcd stuff */
+		  start_stop_recording = 0;
+
 		  lcd_clear();
 		  lcd_put_cur(0, 0);
 		  lcd_send_string("WRITING TO FILE");
 
+		  note_event_count = segment_notes(
+			  f0_estimates, f0_times, total_frames,
+			  MIN_FRAMES, (float32_t)PITCH_TOLERANCE,
+			  note_events, MAX_FRAMES
+		  );
+
+		  compensate_onset(note_events, note_event_count);
+		  snap_notes(note_events, note_event_count, BPM);
+		  midi_size = write_midi_file(
+			  note_events, note_event_count,
+			  BPM, midi_buffer, sizeof(midi_buffer)
+		  );
+
+		  lcd_clear();
+		  lcd_put_cur(0, 0);
+		  lcd_send_string("DONE");
 	  }
 
 	  // Continuous mic processing while recording
@@ -233,12 +254,30 @@ int main(void)
 		  if (half_ready) {
 			  half_ready = 0;
 			  process_mic_dma(0);
-			  dbg_f0 = preprocess_audio(frame_buffer);
+			  f0 = preprocess_audio(frame_buffer);
+			  dbg_f0 = f0;
+			  if (total_frames < MAX_FRAMES) {
+				  f0_estimates[total_frames] = f0;
+				  f0_times[total_frames] = (float32_t)total_frames * FRAME_TIME;
+				  total_frames++;
+			  }
+			  if (total_frames >= MAX_FRAMES) {
+				  stop_flag = 1;  // auto-stop when buffer full
+			  }
 		  }
 		  if (full_ready) {
 			  full_ready = 0;
 			  process_mic_dma(MIC_BUF);
-			  dbg_f0 = preprocess_audio(frame_buffer);
+			  f0 = preprocess_audio(frame_buffer);
+			  dbg_f0 = f0;
+			  if (total_frames < MAX_FRAMES) {
+				  f0_estimates[total_frames] = f0;
+				  f0_times[total_frames] = (float32_t)total_frames * FRAME_TIME;
+				  total_frames++;
+			  }
+			  if (total_frames >= MAX_FRAMES) {
+				  stop_flag = 1;
+			  }
 		  }
 
 		  // Non-blocking metronome
@@ -249,28 +288,6 @@ int main(void)
 			  last_met_toggle = now;
 		  }
 	  }
-
-//	  // TESTING MIC
-//	  if (half_ready) {
-//		  half_ready = 0;
-//		  process_mic_dma(0);
-//		  float32_t f0 = preprocess_audio(frame_buffer);
-//		  dbg_f0 = f0;
-//
-//	  }
-//
-//	  if (full_ready) {
-//		  full_ready = 0;
-//		  process_mic_dma(MIC_BUF);
-//		  float32_t f0 = preprocess_audio(frame_buffer);
-//		  dbg_f0 = f0;
-//	  }
-
-	  //	  for (int i = 0; i < FRAME_LENGTH; i++) {
-	  //	      frame_buffer[i] = 0.5f * sinf(2.0f * 3.14159f * 440.0f * i / 32000.0f);
-	  //	  }
-	  //	  float32_t test_f0 = preprocess_audio(frame_buffer);
-	  //	  dbg_f0 = test_f0;
 
     /* USER CODE END WHILE */
 

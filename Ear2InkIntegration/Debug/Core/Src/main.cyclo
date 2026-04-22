@@ -1,8 +1,8 @@
-../Core/Src/main.c:102:25:dc_block	1
-../Core/Src/main.c:109:13:process_mic_dma	2
-../Core/Src/main.c:136:5:main	7
-../Core/Src/main.c:330:6:SystemClock_Config	3
-../Core/Src/main.c:373:6:HAL_I2S_RxHalfCpltCallback	2
-../Core/Src/main.c:379:6:HAL_I2S_RxCpltCallback	2
-../Core/Src/main.c:385:6:HAL_GPIO_EXTI_Callback	3
-../Core/Src/main.c:404:6:Error_Handler	1
+../Core/Src/main.c:103:25:dc_block	1
+../Core/Src/main.c:110:13:process_mic_dma	2
+../Core/Src/main.c:137:5:main	11
+../Core/Src/main.c:303:6:SystemClock_Config	3
+../Core/Src/main.c:346:6:HAL_I2S_RxHalfCpltCallback	2
+../Core/Src/main.c:352:6:HAL_I2S_RxCpltCallback	2
+../Core/Src/main.c:358:6:HAL_GPIO_EXTI_Callback	3
+../Core/Src/main.c:377:6:Error_Handler	1

@@ -17,17 +17,6 @@ static float32_t prev_variance = 0.0f;
 static int       attack_wait_counter = 0;
 static float32_t frame_scratch[FRAME_LENGTH];
 
-// temp
-volatile float32_t dbg_mean;
-volatile float32_t dbg_variance;
-volatile float32_t dbg_var_ratio;
-volatile float32_t debug_f0;
-volatile float32_t dbg_fs_0;
-volatile float32_t dbg_fs_100;
-volatile float32_t dbg_fs_2048;
-volatile float32_t dbg_fs_4000;
-volatile float32_t dbg_peak;
-
 void preprocessing_init(void)
 {
     arm_rfft_fast_init_f32(&rfft_fwd, FRAME_LENGTH);
@@ -149,26 +138,15 @@ float32_t preprocess_audio(const float32_t *frame)
 	arm_mean_f32(frame_scratch, FRAME_LENGTH, &mean);
 	arm_offset_f32(frame_scratch, -mean, frame_scratch, FRAME_LENGTH);
 
-	// In preprocess_audio, after arm_offset_f32:
-	dbg_fs_0    = frame_scratch[0];
-	dbg_fs_100  = frame_scratch[100];
-	dbg_fs_2048 = frame_scratch[2048];
-	dbg_fs_4000 = frame_scratch[4000];
-
 	// Also track min/max and peak magnitude
 	float32_t peak = 0.0f;
 	for (int i = 0; i < FRAME_LENGTH; i++) {
 	    float32_t v = fabsf(frame_scratch[i]);
 	    if (v > peak) peak = v;
 	}
-	dbg_peak = peak;
 
 	float32_t variance;
 	arm_var_f32(frame_scratch, FRAME_LENGTH, &variance);
-
-	dbg_mean = mean;
-	dbg_variance = variance;
-	dbg_var_ratio = (prev_variance > 1.0f) ? (variance / prev_variance) : 0.0f;
 
 	float32_t f0;
 	if (attack_wait_counter > 0) {
@@ -189,6 +167,5 @@ float32_t preprocess_audio(const float32_t *frame)
 	}
 
 	prev_variance = variance;
-	debug_f0 = f0;
 	return f0;
 }
