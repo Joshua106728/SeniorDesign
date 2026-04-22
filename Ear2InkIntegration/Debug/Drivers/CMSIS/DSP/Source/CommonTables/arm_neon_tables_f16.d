@@ -1,0 +1,12 @@
+Drivers/CMSIS/DSP/Source/CommonTables/arm_neon_tables_f16.o: \
+ ../Drivers/CMSIS/DSP/Source/CommonTables/arm_neon_tables_f16.c \
+ ../Drivers/CMSIS/DSP/PrivateInclude/arm_compiler_specific.h \
+ ../Drivers/CMSIS/DSP/Include/arm_math_types_f16.h \
+ ../Drivers/CMSIS/DSP/Include/arm_math_types.h \
+ ../Drivers/CMSIS/Include/cmsis_compiler.h \
+ ../Drivers/CMSIS/Include/cmsis_gcc.h
+../Drivers/CMSIS/DSP/PrivateInclude/arm_compiler_specific.h:
+../Drivers/CMSIS/DSP/Include/arm_math_types_f16.h:
+../Drivers/CMSIS/DSP/Include/arm_math_types.h:
+../Drivers/CMSIS/Include/cmsis_compiler.h:
+../Drivers/CMSIS/Include/cmsis_gcc.h:

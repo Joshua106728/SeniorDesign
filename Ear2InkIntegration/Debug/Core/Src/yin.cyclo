@@ -1,0 +1,4 @@
+../Core/Src/yin.c:18:6:yin_init	1
+../Core/Src/yin.c:30:13:compute_autocorrelation	2
+../Core/Src/yin.c:61:18:yin_core	16
+../Core/Src/yin.c:144:11:yin_estimate_f0	1
