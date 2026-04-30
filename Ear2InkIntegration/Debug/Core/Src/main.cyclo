@@ -1,0 +1,8 @@
+../Core/Src/main.c:98:25:dc_block	1
+../Core/Src/main.c:105:13:process_mic_dma	2
+../Core/Src/main.c:132:5:main	14
+../Core/Src/main.c:301:6:SystemClock_Config	3
+../Core/Src/main.c:344:6:HAL_I2S_RxHalfCpltCallback	1
+../Core/Src/main.c:345:6:HAL_I2S_RxCpltCallback	1
+../Core/Src/main.c:347:6:HAL_GPIO_EXTI_Callback	3
+../Core/Src/main.c:358:6:Error_Handler	1

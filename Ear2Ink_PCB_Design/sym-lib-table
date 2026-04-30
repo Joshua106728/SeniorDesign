@@ -1,0 +1,10 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "STM32F411RET7")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/STM32F411RET7/KiCADv6/2026-01-14_22-01-32.kicad_sym")(options "")(descr ""))
+  (lib (name "TPS562208DDCR")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/TPS562208DDCR/KiCADv6/2026-01-21_22-15-16.kicad_sym")(options "")(descr ""))
+  (lib (name "SPH0645")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/TPS562208DDCR/KiCADv6/2026-01-21_22-15-16.kicad_sym")(options "")(descr ""))
+  (lib (name "OSTTE020104")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/OSTTE020104/OSTTE020104.kicad_sym")(options "")(descr ""))
+  (lib (name "Inductor")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/IFSC1515AHER4R7M01/KiCADv6/2026-02-07_17-41-00.kicad_sym")(options "")(descr ""))
+  (lib (name "Current_Monitor")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/ul_INA213AIDCKR/KiCADv6/2026-02-07_18-16-29.kicad_sym")(options "")(descr ""))
+  (lib (name "MEM2052-00-195-00-A_REVA")(type "KiCad")(uri "${KIPRJMOD}/Footprints_and_Symbols/MEM2052_00_195_00_A/MEM2052-00-195-00-A_REVA.kicad_sym")(options "")(descr ""))
+)

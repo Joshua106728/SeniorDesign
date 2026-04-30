@@ -1,0 +1,3 @@
+../Core/Src/integration_functions.c:14:6:start_recording	1
+../Core/Src/integration_functions.c:21:6:write2sd	1
+../Core/Src/integration_functions.c:27:6:stop_recording	1

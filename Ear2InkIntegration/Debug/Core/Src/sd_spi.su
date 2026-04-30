@@ -1,0 +1,12 @@
+../Core/Src/sd_spi.c:56:13:SD_TransmitByte	16	static
+../Core/Src/sd_spi.c:60:16:SD_ReceiveByte	24	static
+../Core/Src/sd_spi.c:66:13:SD_TransmitBuffer	16	static
+../Core/Src/sd_spi.c:76:13:SD_ReceiveBuffer	32	static
+../Core/Src/sd_spi.c:90:18:SD_WaitReady	16	static
+../Core/Src/sd_spi.c:100:16:SD_SendCommand	24	static
+../Core/Src/sd_spi.c:119:9:sd_is_sdhc	4	static
+../Core/Src/sd_spi.c:124:11:SD_SPI_Init	32	static
+../Core/Src/sd_spi.c:178:11:SD_ReadBlocks	48	static
+../Core/Src/sd_spi.c:240:11:SD_ReadMultiBlocks	32	static
+../Core/Src/sd_spi.c:278:11:SD_WriteBlocks	32	static
+../Core/Src/sd_spi.c:310:11:SD_WriteMultiBlocks	32	static
