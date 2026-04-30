@@ -17,6 +17,7 @@
 #include "diskio.h"
 #include "sd_spi.h"
 #include "ff_gen_drv.h"
+#include "LCD1602.h"
 
 
 DSTATUS SD_disk_status(BYTE drv) {

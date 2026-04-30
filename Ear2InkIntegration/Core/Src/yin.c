@@ -14,6 +14,13 @@ static float32_t autocorr[FRAME_LENGTH];    /* 16 KB — IFFT output */
 static float32_t diff[MAX_PERIOD];          /* ~2 KB — YIN difference */
 static float32_t cmnd[MAX_PERIOD];          /* ~2 KB — cumulative mean normalized diff */
 
+/* ---- Debug snapshots ---------------------------------------------------- */
+float32_t dbg_yin_autocorr_r0;
+float32_t dbg_yin_glob_min;
+int32_t   dbg_yin_best_idx;
+float32_t dbg_yin_tau_abs;
+float32_t dbg_yin_f0;
+
 
 void yin_init(void)
 {
@@ -52,6 +59,8 @@ static void compute_autocorrelation(const float32_t *frame)
     }
 
     arm_rfft_fast_f32(&rfft_inverse, spectrum, autocorr, 1);
+
+    dbg_yin_autocorr_r0 = autocorr[0];
 }
 
 
@@ -115,6 +124,9 @@ static float32_t yin_core(void)
         best_idx = global_min_idx;
     }
 
+    dbg_yin_glob_min = global_min_val;
+    dbg_yin_best_idx = best_idx;
+
     /* Step 4: Parabolic interpolation around the chosen trough */
     float32_t shift = 0.0f;
     if (best_idx > 0 && best_idx < slice_len - 1) {
@@ -133,6 +145,9 @@ static float32_t yin_core(void)
     /* Convert lag to frequency */
     float32_t tau_absolute = (float32_t)(MIN_PERIOD + best_idx) + shift;
     float32_t f0 = (float32_t)SR / tau_absolute;
+
+    dbg_yin_tau_abs = tau_absolute;
+    dbg_yin_f0 = f0;
 
     return f0;
 }

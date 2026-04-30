@@ -72,18 +72,18 @@ int write_midi_file(const NoteEvent *events, int count,
     buffer[pos++]=(uint8_t)(uspb);
 
     /* Note / rest events */
-    uint32_t gap = 0;
-    int note_count = 0;
+    float32_t prev_note_end = 0.0f;
     for (int i = 0; i < count; i++) {
         if (events[i].type == EVENT_NOTE) {
+            // Use the gap from previous note's end to this note's start
+        	float32_t gap_sec = events[i].start - prev_note_end;
+        	if (gap_sec < 0.0f) gap_sec = 0.0f;
+            uint32_t delta = (uint32_t)seconds_to_ticks(gap_sec, bpm);
             uint32_t dur = (uint32_t)seconds_to_ticks(events[i].delta, bpm);
             uint8_t n = (uint8_t)events[i].midi_note;
-            pos += write_note_on (&buffer[pos], gap, n, 64);
-            pos += write_note_off(&buffer[pos], dur, n, 64);
-            gap = 0;
-            note_count++;
-        } else {
-            gap += (uint32_t)seconds_to_ticks(events[i].delta, bpm);
+            pos += write_note_on (&buffer[pos], delta, n, 64);
+            pos += write_note_off(&buffer[pos], dur,   n, 64);
+            prev_note_end = events[i].end;
         }
     }
 

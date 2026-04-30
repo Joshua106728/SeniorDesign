@@ -69,10 +69,9 @@ uint16_t  mic_dma_buffer[MIC_DOUBLE_BUF];
 float32_t frame_buffer[FRAME_LENGTH];
 volatile bool half_ready = 0;
 volatile bool full_ready = 0;
-volatile int mic_overrun = 0;
 
 float32_t f0;
-uint8_t   midi_buffer[8192];
+uint8_t   midi_buffer[512];
 float32_t f0_estimates[MAX_FRAMES];
 float32_t f0_times[MAX_FRAMES];
 int       total_frames = 0;
@@ -81,15 +80,11 @@ int       note_event_count = 0;
 NoteEvent note_events[MAX_FRAMES];
 
 // Keypad
-volatile uint8_t start_flag, stop_flag, start_stop_recording;
+volatile uint8_t start_flag, stop_flag, processing;
 
-// Debug
-volatile float32_t dbg_f0;
-uint8_t frame_counter = 0;
-float32_t frame_magnitude = 0;
-float32_t dbg_mag;
-int 	  sd_mount_success = 1;
-float32_t	sd_counter = 0;
+// LCD
+static uint32_t last_beat_tick = 0;
+static uint8_t  beat_visible = 0;
 
 /* USER CODE END PV */
 
@@ -124,8 +119,8 @@ static void process_mic_dma(int dma_offset) {
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int row=0;
-int col=0;
+int row = 0;
+int col = 0;
 char key;
 
 /* USER CODE END 0 */
@@ -173,21 +168,21 @@ int main(void)
 
   // initialize LCD
   HAL_Delay(10);
-	lcd_init ();
-	lcd_put_cur(0, 0);
-	 lcd_send_string("                ");
-	lcd_put_cur(1, 0);
-	lcd_send_string("                ");
+  lcd_init ();
+  lcd_put_cur(0, 0);
+  lcd_send_string("                ");
+  lcd_put_cur(1, 0);
+  lcd_send_string("                ");
 
-	HAL_Delay(10);
-	lcd_clear();
-	HAL_Delay(10);
-	lcd_put_cur(0,0);
-	HAL_Delay(10);
+  HAL_Delay(10);
+  lcd_clear();
+  HAL_Delay(10);
+  lcd_put_cur(0,0);
+  HAL_Delay(10);
 
-	lcd_send_string("INITIALIZING");
-	lcd_put_cur(1, 0);
-	HAL_Delay(200);
+  lcd_send_string("INITIALIZING");
+  lcd_put_cur(1, 0);
+  HAL_Delay(10);
 
   // Initialize DSP, DMA, random LED
   yin_init();
@@ -204,33 +199,28 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   // Initialize SD Card
-//  sd_mount_debug();
-//  while (sd_mount_success != 0) {
-//	  sd_mount_success = sd_mount_debug();
-//	  sd_counter++;
-//  }
-//  sd_write_file("TESTFILE.TXT", "five");
   while (1)
   {
-	  // Edge-triggered: just toggle state
 	  if (start_flag) {
 		  start_flag = 0;
-		  start_stop_recording = 1;
+		  processing = 1; // processing flag
 		  total_frames = 0;
 		  note_event_count = 0;
 		  midi_size = 0;
+
 		  lcd_clear();
 		  lcd_put_cur(0, 0);
 		  lcd_send_string("REC AT 80 BPM");
 	  }
 	  if (stop_flag)  {
 		  stop_flag  = 0;
-		  start_stop_recording = 0;
+		  processing = 0;
 
 		  lcd_clear();
 		  lcd_put_cur(0, 0);
 		  lcd_send_string("WRITING TO FILE");
 
+		  // Write to MIDI BUFFER
 		  note_event_count = segment_notes(
 			  f0_estimates, f0_times, total_frames,
 			  MIN_FRAMES, (float32_t)PITCH_TOLERANCE,
@@ -244,18 +234,18 @@ int main(void)
 			  BPM, midi_buffer, sizeof(midi_buffer)
 		  );
 
+
 		  lcd_clear();
 		  lcd_put_cur(0, 0);
 		  lcd_send_string("DONE");
 	  }
 
 	  // Continuous mic processing while recording
-	  if (start_stop_recording) {
+	  if (processing) {
 		  if (half_ready) {
 			  half_ready = 0;
 			  process_mic_dma(0);
 			  f0 = preprocess_audio(frame_buffer);
-			  dbg_f0 = f0;
 			  if (total_frames < MAX_FRAMES) {
 				  f0_estimates[total_frames] = f0;
 				  f0_times[total_frames] = (float32_t)total_frames * FRAME_TIME;
@@ -269,7 +259,6 @@ int main(void)
 			  full_ready = 0;
 			  process_mic_dma(MIC_BUF);
 			  f0 = preprocess_audio(frame_buffer);
-			  dbg_f0 = f0;
 			  if (total_frames < MAX_FRAMES) {
 				  f0_estimates[total_frames] = f0;
 				  f0_times[total_frames] = (float32_t)total_frames * FRAME_TIME;
@@ -280,12 +269,21 @@ int main(void)
 			  }
 		  }
 
-		  // Non-blocking metronome
-		  static uint32_t last_met_toggle = 0;
 		  uint32_t now = HAL_GetTick();
-		  if (now - last_met_toggle >= 375) {
-			  HAL_GPIO_TogglePin(MET_GPIO_Port, MET_Pin);
-			  last_met_toggle = now;
+		  uint32_t phase = (now - last_beat_tick);
+
+		  if (!beat_visible && phase >= BEAT_MS) {
+			  // New beat — show the indicator
+			  lcd_put_cur(1, 0);
+			  lcd_send_string("* BPM 80 *");
+			  beat_visible = 1;
+			  last_beat_tick = now;
+		  }
+		  else if (beat_visible && phase >= FLASH_MS) {
+			  // Flash window ended — clear it
+			  lcd_put_cur(1, 0);
+			  lcd_send_string("          ");   // 10 spaces to erase
+			  beat_visible = 0;
 		  }
 	  }
 
@@ -343,30 +341,13 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s) {
-	HAL_GPIO_TogglePin(GPIOC, LED1_Pin);
-	if (half_ready) mic_overrun++;
-	half_ready = 1;
-}
+void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s) {half_ready = 1; }
+void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s) {full_ready = 1; }
 
-void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s) {
-	HAL_GPIO_TogglePin(GPIOC, LED1_Pin);
-	if (full_ready) mic_overrun++;
-	full_ready = 1;
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin) {
+	if(GPIO_pin == C1_Pin) {start_flag = 1; }
+	else if(GPIO_pin == C3_Pin) {stop_flag = 1; }
 }
-
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin)
-{
-	if(GPIO_pin == C1_Pin)
-	{
-		start_flag = 1;
-	}
-	else if(GPIO_pin == C3_Pin)
-	{
-		stop_flag = 1;
-	}
-}
-
 
 /* USER CODE END 4 */
 

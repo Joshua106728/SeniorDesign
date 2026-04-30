@@ -13,35 +13,27 @@
 /****************** define the timer handler below  **************/
 #define timer htim1
 
-
 extern TIM_HandleTypeDef timer;
-void delay (uint16_t us)
-{
+void delay (uint16_t us) {
 	__HAL_TIM_SET_COUNTER(&timer, 0);
 	while (__HAL_TIM_GET_COUNTER(&timer) < us);
 }
 
 /****************************************************************************************************************************************************************/
 
-void send_to_lcd (char data, int rs)
-{
-	HAL_GPIO_WritePin(RW_GPIO_Port, RW_Pin, GPIO_PIN_RESET);  // RW = 0 (WRITE)//ADDED THIS FROM CHAT, SAYING THAT THE RW PIN IS NEVER SET, P SURE I JUST CONNECTED IT TO GND THO
-	HAL_GPIO_WritePin(RS_GPIO_Port, RS_Pin, rs);  // rs = 1 for data, rs=0 for command
+void send_to_lcd(char data, int rs) {
+    HAL_GPIO_WritePin(RW_GPIO_Port, RW_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(RS_GPIO_Port, RS_Pin, rs);
 
-	/* write the data to the respective pin */
-	HAL_GPIO_WritePin(D7_GPIO_Port, D7_Pin, ((data>>3)&0x01));
-	HAL_GPIO_WritePin(D6_GPIO_Port, D6_Pin, ((data>>2)&0x01));
-	HAL_GPIO_WritePin(D5_GPIO_Port, D5_Pin, ((data>>1)&0x01));
-	HAL_GPIO_WritePin(D4_GPIO_Port, D4_Pin, ((data>>0)&0x01));
+    HAL_GPIO_WritePin(D7_GPIO_Port, D7_Pin, ((data >> 3) & 0x01));
+    HAL_GPIO_WritePin(D6_GPIO_Port, D6_Pin, ((data >> 2) & 0x01));
+    HAL_GPIO_WritePin(D5_GPIO_Port, D5_Pin, ((data >> 1) & 0x01));
+    HAL_GPIO_WritePin(D4_GPIO_Port, D4_Pin, ((data >> 0) & 0x01));
 
-	/* Toggle EN PIN to send the data
-	 * if the HCLK > 100 MHz, use the  20 us delay
-	 * if the LCD still doesn't work, increase the delay to 50, 80 or 100..
-	 */
-	HAL_GPIO_WritePin(EN_GPIO_Port, EN_Pin, 1);
-	HAL_Delay(40);
-	HAL_GPIO_WritePin(EN_GPIO_Port, EN_Pin, 0);
-	HAL_Delay(40);
+    HAL_GPIO_WritePin(EN_GPIO_Port, EN_Pin, 1);
+    delay(1);
+    HAL_GPIO_WritePin(EN_GPIO_Port, EN_Pin, 0);
+    delay(50);
 }
 
 void lcd_send_cmd (char cmd)

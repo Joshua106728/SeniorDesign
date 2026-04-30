@@ -103,7 +103,10 @@ static float32_t yin_estimate(void)
             int is_min = 1;
             if (i > 0 && val > diff[start + i - 1]) is_min = 0;
             if (i < (slice_len - 1) && val > diff[start + i + 1]) is_min = 0;
-            if (is_min) { best_idx = i; break; }
+            if (is_min) {
+            	best_idx = i;
+            	break;
+            }
         }
 
         if (val < glob_min) {
@@ -131,24 +134,46 @@ static float32_t yin_estimate(void)
     return (float32_t)SR / tau_abs;
 }
 
+static float32_t hps_estimate(const float32_t *magnitude_spec, int n_harmonics)
+{
+    // Search range: convert Hz to bin indices
+    // bin = freq * FRAME_LENGTH / SR
+    int bin_min = (int)((float32_t)FREQ_LOWER * FRAME_LENGTH / SR);
+    int bin_max = (int)((float32_t)FREQ_UPPER * FRAME_LENGTH / SR);
+
+    // Safety clamp: highest bin we can reach for the Nth harmonic must be < NUM_BINS
+    int max_bin_limit = (NUM_BINS - 1) / n_harmonics;
+    if (bin_max > max_bin_limit) bin_max = max_bin_limit;
+
+    float32_t best_val = 0.0f;
+    int best_bin = bin_min;
+
+    for (int k = bin_min; k <= bin_max; k++) {
+        // Product of magnitudes at k, 2k, 3k, ..., n_harmonics*k
+        float32_t prod = magnitude_spec[k];
+        for (int h = 2; h <= n_harmonics; h++) {
+            prod *= magnitude_spec[k * h];
+        }
+
+        if (prod > best_val) {
+            best_val = prod;
+            best_bin = k;
+        }
+    }
+
+    // Convert bin back to frequency
+    return (float32_t)best_bin * (float32_t)SR / (float32_t)FRAME_LENGTH;
+}
+
 float32_t preprocess_audio(const float32_t *frame)
 {
 	arm_copy_f32((float32_t *)frame, frame_scratch, FRAME_LENGTH);
-	float32_t mean;
+
+	float32_t mean, variance;
 	arm_mean_f32(frame_scratch, FRAME_LENGTH, &mean);
-	arm_offset_f32(frame_scratch, -mean, frame_scratch, FRAME_LENGTH);
-
-	// Also track min/max and peak magnitude
-	float32_t peak = 0.0f;
-	for (int i = 0; i < FRAME_LENGTH; i++) {
-	    float32_t v = fabsf(frame_scratch[i]);
-	    if (v > peak) peak = v;
-	}
-
-	float32_t variance;
 	arm_var_f32(frame_scratch, FRAME_LENGTH, &variance);
 
-	float32_t f0;
+	float32_t f0_yin, f0_hps, f0;
 	if (attack_wait_counter > 0) {
 		f0 = -1;
 		attack_wait_counter--;
@@ -161,9 +186,18 @@ float32_t preprocess_audio(const float32_t *frame)
 		attack_wait_counter = WAIT_ATTACK;
 	}
 	else {
+		arm_offset_f32(frame_scratch, -mean, frame_scratch, FRAME_LENGTH);
 		spectral_whiten(frame_scratch, whitened_buf);
+		f0_hps = hps_estimate(magnitude, 4);
 		compute_autocorrelation(whitened_buf);
-		f0 = yin_estimate();
+		f0_yin = yin_estimate();
+
+		if (f0_hps > 250) {
+			f0 = f0_hps;
+		}
+		else {
+			f0 = f0_yin;
+		}
 	}
 
 	prev_variance = variance;

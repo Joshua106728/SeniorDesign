@@ -2,4 +2,5 @@
 ../Core/Src/preprocessing.c:26:13:spectral_whiten	7
 ../Core/Src/preprocessing.c:60:13:compute_autocorrelation	2
 ../Core/Src/preprocessing.c:75:18:yin_estimate	16
-../Core/Src/preprocessing.c:134:11:preprocess_audio	7
+../Core/Src/preprocessing.c:137:18:hps_estimate	5
+../Core/Src/preprocessing.c:168:11:preprocess_audio	6

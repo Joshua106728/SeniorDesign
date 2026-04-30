@@ -24,13 +24,13 @@
 // Determine note
 #define SILENCE_THRESHOLD	5.0e8f
 #define NOTE_ONSET			4.0f
-#define WAIT_ATTACK			6
+#define WAIT_ATTACK			4
 
 // Frequency range
 #define FREQ_LOWER          80
-#define FREQ_UPPER          700
-#define MIN_PERIOD          63      // SR / FREQ_UPPER
-#define MAX_PERIOD          551     // SR / FREQ_LOWER
+#define FREQ_UPPER          800
+#define MIN_PERIOD          40      // SR / FREQ_UPPER
+#define MAX_PERIOD          400     // SR / FREQ_LOWER
 
 // Spectral whitening
 #define SMOOTHING_WINDOW    15
@@ -39,17 +39,21 @@
 // YIN
 #define NUM_BINS            (HOP_LENGTH + 1)   // 2049
 #define YIN_SLICE_LEN       (MAX_PERIOD - MIN_PERIOD + 1)  // 489
-#define TROUGH_THRESHOLD    0.05f
+#define TROUGH_THRESHOLD    0.15f
 
 // Postprocessing
 #define BPM 				80
 #define NOTE_DUR 			15.0f / (float32_t)BPM
-#define MIN_FRAMES			(int) (NOTE_DUR / FRAME_TIME)
-#define MAX_FRAMES			512
+#define MIN_FRAMES			3
+#define MAX_FRAMES			850
 #define PITCH_TOLERANCE		100
 
 // MIDI
 #define TICKS_PER_BEAT      96
+
+// LED
+#define BEAT_MS				750
+#define FLASH_MS			150
 
 // Note event types
 #define EVENT_NOTE  0

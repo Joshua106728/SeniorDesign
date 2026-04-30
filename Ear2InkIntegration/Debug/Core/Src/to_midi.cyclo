@@ -2,4 +2,4 @@
 ../Core/Src/to_midi.c:25:12:seconds_to_ticks	1
 ../Core/Src/to_midi.c:31:12:write_note_on	1
 ../Core/Src/to_midi.c:40:12:write_note_off	1
-../Core/Src/to_midi.c:49:5:write_midi_file	3
+../Core/Src/to_midi.c:49:5:write_midi_file	4
